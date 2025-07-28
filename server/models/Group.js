@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
-const GroupSchema = new mongoose.Schema({
+
+const groupSchema = new mongoose.Schema({
   name: String,
-  createdAt: { type: Date, default: Date.now },
+  zip: String,
+  state: String,
+  effective_date: String,
+  industry_code: String,
+  ideonGroupId: String,  
 });
-module.exports = mongoose.model('Group', GroupSchema);
+
+module.exports = mongoose.model('Group', groupSchema);

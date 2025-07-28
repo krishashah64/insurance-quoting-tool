@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const MemberSchema = new mongoose.Schema({
+const memberSchema = new mongoose.Schema({
   groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
-  name: String,
-  age: Number,
+  ideonMemberId: String,
+  first_name: String,
+  last_name: String,
+  dob: String,
   zip: String,
   tobacco: Boolean,
-  classId: String,
-  previousEmployerContribution: Number,
-  previousMemberContribution: Number,
+  age: Number
 });
-module.exports = mongoose.model('Member', MemberSchema);
