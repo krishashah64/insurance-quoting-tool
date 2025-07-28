@@ -9,3 +9,4 @@ const memberSchema = new mongoose.Schema({
   tobacco: Boolean,
   age: Number
 });
+module.exports = mongoose.model('Member', memberSchema);

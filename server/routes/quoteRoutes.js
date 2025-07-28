@@ -5,6 +5,8 @@ const ZipCounty = require('../models/ZipCounty');
 const PlanCounty = require('../models/PlanCounty');
 const Pricing = require('../models/Pricing');
 const Plan = require('../models/Plan');
+const Affordability = require('../models/Affordability');
+
 
 router.post('/', async (req, res) => {
   try {
@@ -12,45 +14,55 @@ router.post('/', async (req, res) => {
     console.log('POST /api/quote hit with groupId:', req.body.groupId);
 
 
-    // 1. Get all members
+    
     const members = await Member.find({ groupId });
-    // const members = await Member.find({ groupId: req.body.groupId });
-console.log(`Found ${members.length} members for group ${req.body.groupId}`);
+    
+    console.log(`Found ${members.length} members for group ${req.body.groupId}`);
 
     if (members.length === 0) return res.status(404).json({ message: 'No members found.' });
+
+    
+    const affordabilityMap = {};
+    const affordabilityResults = await Affordability.find({ groupId });
+
+    for (const a of affordabilityResults) {
+      affordabilityMap[a.ideonMemberId] = a;
+    }
 
     let allQuotes = [];
 
     for (const member of members) {
-       console.log(`👤 Processing member: ${member.name}, Zip: ${member.zip}, Age: ${member.age}, Tobacco: ${member.tobacco}`);
+       console.log(`Processing member: ${member.name}, Zip: ${member.zip}, Age: ${member.age}, Tobacco: ${member.tobacco}`);
 
       const zipMatch = await ZipCounty.findOne({ zip_code_id: member.zip });
       if (!zipMatch) continue;
 
       const { county_id, rating_area_id } = zipMatch;
 
-      // 2. Get plan_ids available in this county
       const planCountyMatches = await PlanCounty.find({ county_id });
       const planIds = planCountyMatches.map(p => p.plan_id);
 
       for (const plan_id of planIds) {
-        // 3. Find matching pricing record for this age and tobacco
         const pricing = await Pricing.findOne({ plan_id, rating_area_id });
         if (!pricing) continue;
 
         const ageKey = `age_${member.age}${member.tobacco ? '_tobacco' : ''}`;
         const monthlyPremium = parseFloat(pricing[ageKey]) || 0;
 
+        const affordability = affordabilityMap[member.ideonMemberId];
+
         allQuotes.push({
           memberId: member._id,
           memberName: member.name,
           plan_id,
           premium: monthlyPremium,
+          affordability: affordability || null, 
         });
+
+
       }
     }
 
-    // 4. Aggregate: total premium per plan
     const planTotals = {};
 
     for (const quote of allQuotes) {
@@ -62,6 +74,7 @@ console.log(`Found ${members.length} members for group ${req.body.groupId}`);
         memberId: quote.memberId,
         name: quote.memberName,
         premium: quote.premium,
+        affordability: quote.affordability || null,
       });
     }
 

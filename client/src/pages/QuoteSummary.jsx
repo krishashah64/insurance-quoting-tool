@@ -16,9 +16,9 @@ const QuoteSummary = () => {
   useEffect(() => {
     const fetchQuotes = async () => {
       try {
-        console.log('⏳ Sending groupId to backend:', groupId);
+        console.log('Sending groupId to backend:', groupId);
         const { data } = await axios.post('/api/quote', { groupId });
-        setPlans(data.plans || data); // support old or new shape
+        setPlans(data.plans || data); 
       } catch (err) {
         console.error('Error fetching quote summary:', err);
       } finally {
@@ -50,7 +50,7 @@ const QuoteSummary = () => {
 
       {!loading && (
         <>
-          {/* Filters */}
+          
           <div className="filters">
             <select onChange={e => setFilter({ ...filter, carrier: e.target.value })}>
               <option value="">All Carriers</option>
@@ -68,7 +68,7 @@ const QuoteSummary = () => {
             </select>
           </div>
 
-          {/* Plan Summary Table */}
+          
           <table className="plan-table">
             <thead>
               <tr>
@@ -88,10 +88,24 @@ const QuoteSummary = () => {
                   <td>{plan.planDetails.metal_level}</td>
                   <td>{plan.planDetails.market_type}</td>
                   <td>${plan.totalPremium.toFixed(2)}</td>
-                  <td>{plan.members.length}</td>
+                  <td>
+                    {plan.members.map(m => (
+                      <div key={m.memberId} style={{ marginBottom: '6px' }}>
+                        <strong>{m.name}</strong>: ${m.premium.toFixed(2)}<br />
+                        {m.affordability ? (
+                          <span style={{ color: m.affordability.affordable ? 'green' : 'red' }}>
+                            {m.affordability.affordable ? 'Affordable' : 'Not Affordable '}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'gray' }}>No Affordability Info</span>
+                        )}
+                      </div>
+                    ))}
+                  </td>
                 </tr>
               ))}
             </tbody>
+
           </table>
         </>
       )}

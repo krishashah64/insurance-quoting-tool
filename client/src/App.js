@@ -10,8 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<GroupSetup />} />
         <Route path="/members/:groupId" element={<MemberOnboarding />} />
-        {/* <Route path="/quote/:groupId" element={<QuoteSummary />} /> */}
-         <Route path="/group/:groupId/quote" element={<QuoteSummary />} />
+         <Route path="/quote/:groupId" element={<QuoteSummary />} />
       </Routes>
     </Router>
   );
